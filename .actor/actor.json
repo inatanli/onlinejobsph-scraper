@@ -4,5 +4,6 @@
   "title": "OnlineJobs.ph Scraper",
   "description": "Scrapes job listings from OnlineJobs.ph by keyword and page count.",
   "version": "0.1",
-  "dockerfile": "../Dockerfile"
+  "dockerfile": "../Dockerfile",
+  "output": "./output_schema.json"
 }

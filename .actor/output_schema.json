@@ -1,0 +1,13 @@
+{
+    "actorOutputSchemaVersion": 1,
+    "title": "Output schema of OnlineJobs.ph Scraper",
+    "description": "Job postings scraped from OnlineJobs.ph, one item per job listing.",
+    "properties": {
+        "results": {
+            "type": "string",
+            "title": "Job listings",
+            "description": "Dataset items containing scraped job postings (jobUrl, jobTitle, employmentType, salary, dateUpdated, fullDescription, skills).",
+            "template": "{{links.apiDefaultDatasetUrl}}/items"
+        }
+    }
+}
