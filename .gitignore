@@ -16,6 +16,9 @@ env/
 # Crawlee / Apify storage
 storage/
 
+# Local scrape exports
+output.json
+
 # Environment
 .env
 .env.*
