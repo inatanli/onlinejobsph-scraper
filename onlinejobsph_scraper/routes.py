@@ -4,9 +4,9 @@ from crawlee import Request
 from crawlee.crawlers import BeautifulSoupCrawlingContext
 from crawlee.router import Router
 
-router = Router[BeautifulSoupCrawlingContext]()
+from .main import BASE_URL
 
-BASE_URL = 'https://www.onlinejobs.ph'
+router = Router[BeautifulSoupCrawlingContext]()
 
 
 @router.default_handler
