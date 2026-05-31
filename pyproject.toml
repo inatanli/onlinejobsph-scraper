@@ -1,9 +1,9 @@
 [project]
 name = "onlinejobsph-scraper"
 version = "0.0.1"
-description = ""
+description = "Apify Actor that scrapes job postings from OnlineJobs.ph by keyword and page count."
 authors = [
-    {name = "Your Name",email = "you@example.com"}
+    {name = "Ina Li",email = "czarinaangelicali@gmail.com"}
 ]
 readme = "README.md"
 requires-python = ">=3.10,<4.0"
