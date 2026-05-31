@@ -19,8 +19,8 @@ Passed as CLI arguments or Apify input schema fields.
 
 ## Output Format
 
-- **CLI:** `output.json` in the working directory — array of job objects, overwritten on each run
-- **Apify:** Items pushed to the default dataset (one item per job)
+- **Local (`apify run`):** Items written to `storage/datasets/default/` (one JSON file per item)
+- **Apify cloud:** Items pushed to the Apify default dataset, accessible from the console
 
 Total requests per crawl is capped at `maxPages + maxPages × 30` (listing pages + up to 30 detail pages each).
 
@@ -92,12 +92,13 @@ https://www.onlinejobs.ph/jobseekers/jobsearch/0?jobkeyword={jobKeyword}
 
 ### Rate Limiting
 
-- Enforce a minimum **5-second delay** between requests as specified by `Crawl-delay: 5` in `robots.txt`
+- Honor `Crawl-delay: 5` from `robots.txt`: at most one request every 5 seconds → **12 requests/minute**
 - The paths `/jobseekers/jobsearch` and `/jobseekers/job/` are not disallowed — scraping is permitted
-- Implemented via Crawlee's `ThrottlingRequestManager` with `set_crawl_delay`:
-  - `domains` must be a **bare hostname** (`www.onlinejobs.ph`) — the manager uses it as a dict key directly
-  - `set_crawl_delay` takes a **full URL** (`https://www.onlinejobs.ph`) — it extracts the host internally
-  - Passing the full URL to `domains` silently bypasses throttling (no error raised)
+- Implemented via Crawlee's `ConcurrencySettings` on the `BeautifulSoupCrawler`:
+  - `max_concurrency=1` (with `desired_concurrency=1`) processes one page at a time — the crawler rejects `desired_concurrency > max_concurrency`, so both must be set
+  - `max_tasks_per_minute=12` (`60 // CRAWL_DELAY_SECONDS`) caps the rate to the crawl-delay
+- Since onlinejobs.ph is the only domain crawled, a plain default `RequestQueue` is used — all requests live in one queue, so `apify run -p` purges cleanly between local runs
+- Avoid `ThrottlingRequestManager` here: for a single throttled domain it routes every request into a separate aliased queue (`throttled-<host>`) that `apify run -p` does **not** purge, causing requests to accumulate across local runs
 
 ### Error Handling
 
@@ -109,10 +110,12 @@ https://www.onlinejobs.ph/jobseekers/jobsearch/0?jobkeyword={jobKeyword}
 
 ## Deployment Targets
 
-### CLI
+### Local (via Apify CLI)
+
+Set input in `storage/key_value_stores/default/INPUT.json`, then:
 
 ```bash
-python -m onlinejobsph_scraper --jobKeyword "virtual assistant" --maxPages 5
+apify run
 ```
 
 ### Apify

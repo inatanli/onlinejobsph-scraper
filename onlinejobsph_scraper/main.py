@@ -1,16 +1,16 @@
-import json
-
 from apify import Actor
+from crawlee import ConcurrencySettings
 from crawlee.crawlers import BeautifulSoupCrawler
 from crawlee.http_clients import HttpxHttpClient
-from crawlee.request_loaders import ThrottlingRequestManager
-from crawlee.storages import RequestQueue
 
-from .routes import router
+BASE_URL = 'https://www.onlinejobs.ph'
 
-HOSTNAME = 'www.onlinejobs.ph'
-BASE_URL = f'https://{HOSTNAME}'
+# Defined after BASE_URL: routes.py imports BASE_URL from this module, so the
+# name must exist before `from .routes import router` triggers that import.
+from .routes import router  # noqa: E402
+# robots.txt declares `Crawl-delay: 5`, i.e. one request every 5s → 12/min.
 CRAWL_DELAY_SECONDS = 5
+MAX_REQUESTS_PER_MINUTE = 60 // CRAWL_DELAY_SECONDS
 
 
 async def main(job_keyword: str | None = None, max_pages: int = 5) -> None:
@@ -29,29 +29,20 @@ async def main(job_keyword: str | None = None, max_pages: int = 5) -> None:
             else:
                 start_urls.append(f'{base}/{offset}')
 
-        # ThrottlingRequestManager keys domains by bare hostname (used directly as
-        # the dict key), while set_crawl_delay resolves its arg through URL().host —
-        # so pass the hostname to `domains` and a full URL to set_crawl_delay.
-        queue = await RequestQueue.open()
-        request_manager = ThrottlingRequestManager(
-            inner=queue,
-            domains=[HOSTNAME],
-            request_manager_opener=RequestQueue.open,
+        # Single-domain crawl: process one page at a time and cap the rate to
+        # honor robots.txt's Crawl-delay. This keeps all requests in the default
+        # RequestQueue, so `apify run -p` fully purges between runs.
+        concurrency_settings = ConcurrencySettings(
+            desired_concurrency=1,
+            max_concurrency=1,
+            max_tasks_per_minute=MAX_REQUESTS_PER_MINUTE,
         )
-        request_manager.set_crawl_delay(BASE_URL, CRAWL_DELAY_SECONDS)
 
         crawler = BeautifulSoupCrawler(
             request_handler=router,
-            request_manager=request_manager,
+            concurrency_settings=concurrency_settings,
             max_requests_per_crawl=max_pages + max_pages * 30,
             http_client=HttpxHttpClient(),
         )
 
         await crawler.run(start_urls)
-
-        if not Actor.is_at_home():
-            dataset = await Actor.open_dataset()
-            result = await dataset.get_data()
-            with open('output.json', 'w') as f:
-                json.dump(result.items, f, indent=2, ensure_ascii=False)
-            Actor.log.info(f'Wrote {len(result.items)} jobs to output.json')
