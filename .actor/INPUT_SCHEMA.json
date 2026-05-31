@@ -1,0 +1,21 @@
+{
+  "title": "OnlineJobs.ph Scraper Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "jobKeyword": {
+      "title": "Job Keyword",
+      "type": "string",
+      "description": "Search keyword (e.g. virtual assistant, gtm). Leave blank to return all jobs.",
+      "editor": "textfield"
+    },
+    "maxPages": {
+      "title": "Max Pages",
+      "type": "integer",
+      "description": "Maximum number of search result pages to crawl (30 jobs per page).",
+      "default": 5,
+      "minimum": 1,
+      "editor": "number"
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "actorSpecification": 1,
+  "name": "onlinejobsph-scraper",
+  "title": "OnlineJobs.ph Scraper",
+  "description": "Scrapes job listings from OnlineJobs.ph by keyword and page count.",
+  "version": "0.1",
+  "dockerfile": "../Dockerfile"
+}
