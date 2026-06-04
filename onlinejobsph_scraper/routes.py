@@ -31,6 +31,10 @@ async def detail_handler(context: BeautifulSoupCrawlingContext) -> None:
     soup = context.soup
     context.log.info(f'Detail page: {context.request.url}')
 
+    if soup.select_one('section.section-404'):
+        context.log.info(f'Skipping unavailable job: {context.request.url}')
+        return
+
     title_el = soup.select_one('h1.job__title')
     job_title = title_el.get_text(strip=True) if title_el else None
 

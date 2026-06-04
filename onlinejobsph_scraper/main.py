@@ -1,3 +1,5 @@
+from urllib.parse import quote_plus
+
 from apify import Actor
 from crawlee import ConcurrencySettings
 from crawlee.crawlers import BeautifulSoupCrawler
@@ -25,7 +27,7 @@ async def main(job_keyword: str | None = None, max_pages: int = 5) -> None:
         for i in range(max_pages):
             offset = i * 30
             if job_keyword:
-                start_urls.append(f'{base}/{offset}?jobkeyword={job_keyword}')
+                start_urls.append(f'{base}/{offset}?jobkeyword={quote_plus(job_keyword)}')
             else:
                 start_urls.append(f'{base}/{offset}')
 
@@ -43,6 +45,7 @@ async def main(job_keyword: str | None = None, max_pages: int = 5) -> None:
             concurrency_settings=concurrency_settings,
             max_requests_per_crawl=max_pages + max_pages * 30,
             http_client=HttpxHttpClient(),
+            ignore_http_error_status_codes=[410],
         )
 
         await crawler.run(start_urls)
