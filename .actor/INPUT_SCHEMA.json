@@ -14,8 +14,8 @@
       "title": "Max Pages",
       "type": "integer",
       "description": "Maximum number of search result pages to crawl (30 jobs per page).",
-      "default": 5,
-      "prefill": 5,
+      "default": 1,
+      "prefill": 1,
       "minimum": 1,
       "editor": "number"
     }
