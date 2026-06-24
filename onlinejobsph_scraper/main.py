@@ -44,7 +44,8 @@ async def main(job_keyword: str | None = None, max_pages: int = 5) -> None:
             request_handler=router,
             concurrency_settings=concurrency_settings,
             max_requests_per_crawl=max_pages + max_pages * 30,
-            http_client=HttpxHttpClient(),
+            http_client=HttpxHttpClient(timeout=30),
+            max_request_retries=1,
             ignore_http_error_status_codes=[410],
         )
 
